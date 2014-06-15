@@ -12,6 +12,15 @@ import android.widget.ArrayAdapter;
 
 public class ImageResultsArrayAdapter extends ArrayAdapter<ImageResult> {
 	
+	
+	private static class ViewHolder {
+		public SmartImageView sImage;
+
+		public ViewHolder(View view) {
+			sImage = (SmartImageView) view.findViewById(R.id.sImage);
+		}
+
+	}
 	public ImageResultsArrayAdapter(Context context, List<ImageResult> images) {
 		super(context, R.layout.item_image_result, images);  
 	}
@@ -19,18 +28,19 @@ public class ImageResultsArrayAdapter extends ArrayAdapter<ImageResult> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ImageResult imageInfo = this.getItem(position);
-		SmartImageView ivImage;
+		 ViewHolder holder;
 		if (convertView == null){
 			LayoutInflater inflater = LayoutInflater.from(getContext());
-			ivImage = (SmartImageView) inflater.inflate(R.layout.item_image_result,parent,false);
+			convertView = inflater.inflate(R.layout.item_image_result,parent,false);
+			holder = new ViewHolder(convertView);
+			convertView.setTag(holder);
 		}else{
-			ivImage = (SmartImageView) convertView;
-			ivImage.setImageResource(android.R.color.transparent);
+			 holder = (ViewHolder) convertView.getTag();
+			 holder.sImage.setImageResource(android.R.color.transparent);
 		}
-
-		ivImage.setImageUrl(imageInfo.getThumbUrl());
-		return ivImage;
 		
+		holder.sImage.setImageUrl(imageInfo.getThumbUrl());
+		return convertView;
 	}
 	
 }

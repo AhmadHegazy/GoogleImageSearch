@@ -70,6 +70,7 @@ public class SearchActivity extends Activity {
 		query = etQuery.getText().toString();
 		Toast.makeText(this,"query"+query,Toast.LENGTH_SHORT).show();
 		imageResults.clear();
+		imageAdapter.clear();
 		searchWithOffset(0);
 	}
 	
