@@ -3,18 +3,12 @@ package com.example.gridimagesearch;
 import java.util.List;
 
 import com.loopj.android.image.SmartImageView;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 public class ImageResultsArrayAdapter extends ArrayAdapter<ImageResult> {
 	
@@ -38,6 +32,5 @@ public class ImageResultsArrayAdapter extends ArrayAdapter<ImageResult> {
 		return ivImage;
 		
 	}
-
 	
 }

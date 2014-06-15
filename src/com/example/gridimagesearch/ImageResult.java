@@ -1,7 +1,6 @@
 package com.example.gridimagesearch;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import org.json.JSONArray;
 import org.json.JSONException;

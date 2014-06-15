@@ -26,6 +26,7 @@ public class SearchActivity extends Activity {
 	EditText etQuery;
 	GridView gvResults;
 	Button btnSearch;
+	String query;
 	ArrayList <ImageResult> imageResults = new ArrayList <ImageResult>();
 	ImageResultsArrayAdapter imageAdapter;
 
@@ -47,6 +48,16 @@ public class SearchActivity extends Activity {
                 startActivity(i);
             }
         });
+		
+		gvResults.setOnScrollListener(new EndlessScrollListener() {
+		    @Override
+		    public void onLoadMore(int page, int totalItemsCount) {
+	                // Triggered only when new data needs to be appended to the list
+	                // Add whatever code is needed to append new items to your AdapterView
+		        customLoadMoreDataFromApi(page); 
+	                // or customLoadMoreDataFromApi(totalItemsCount); 
+		    }
+	        });
 	}
 	
 	public void setupViews(){
@@ -56,17 +67,21 @@ public class SearchActivity extends Activity {
 	}
 	
 	public void onImageSearch(View v){
-		String query = etQuery.getText().toString();
+		query = etQuery.getText().toString();
 		Toast.makeText(this,"query"+query,Toast.LENGTH_SHORT).show();
+		imageResults.clear();
+		searchWithOffset(0);
+	}
+	
+	public void searchWithOffset(int offset){
 		AsyncHttpClient client = new AsyncHttpClient(); 
 		client.get("https://ajax.googleapis.com/ajax/services/search/images?" +
-                  "start=" + 0 + "&v=1.0&q=" + Uri.encode(query)+"&rsz=8", new JsonHttpResponseHandler(){
+                  "start=" + Integer.toString(offset*8) + "&v=1.0&q=" + Uri.encode(query)+"&rsz=8", new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject response){
 				JSONArray imageJsonResults = null;
 				try {
 					imageJsonResults = response.getJSONObject("responseData").getJSONArray("results");
-					imageResults.clear();
 					imageAdapter.addAll(ImageResult.fromJSONArray(imageJsonResults));
 					Log.d("DEBUG",imageResults.toString());
 				}catch(JSONException e){
@@ -74,7 +89,12 @@ public class SearchActivity extends Activity {
 				}
 			}
 		});
-
+		
 	}
+	
+	 private void customLoadMoreDataFromApi(int offset) {
+		 Toast.makeText(this,"offset"+Integer.toString(offset),Toast.LENGTH_SHORT).show();
+		 searchWithOffset(offset); 
+	 }
 	
 }
