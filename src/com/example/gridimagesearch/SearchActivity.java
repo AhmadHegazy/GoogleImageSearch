@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -23,13 +25,14 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 public class SearchActivity extends Activity {
+	public static final String SETTINGS_KEY = "settings";
 	EditText etQuery;
 	GridView gvResults;
 	Button btnSearch;
 	String query;
 	ArrayList <ImageResult> imageResults = new ArrayList <ImageResult>();
 	ImageResultsArrayAdapter imageAdapter;
-
+    Settings setting;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class SearchActivity extends Activity {
 		setContentView(R.layout.activity_search);
 		imageAdapter = new ImageResultsArrayAdapter(this, imageResults);
 		setupViews();
+		setting = new Settings();
 		gvResults.setAdapter(imageAdapter);
 		gvResults.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -75,9 +79,13 @@ public class SearchActivity extends Activity {
 	}
 	
 	public void searchWithOffset(int offset){
-		AsyncHttpClient client = new AsyncHttpClient(); 
-		client.get("https://ajax.googleapis.com/ajax/services/search/images?" +
-                  "start=" + Integer.toString(offset*8) + "&v=1.0&q=" + Uri.encode(query)+"&rsz=8", new JsonHttpResponseHandler(){
+		AsyncHttpClient client = new AsyncHttpClient();
+		String url= "https://ajax.googleapis.com/ajax/services/search/images?" +
+                "start=" + Integer.toString(offset*8) + "&v=1.0&q=" + Uri.encode(query)+"&rsz=8"+setting.getQueryString().toString();
+        Toast.makeText(this, url, Toast.LENGTH_LONG).show();
+  	    Log.d("QUERY_DONE",setting.getQueryString());
+
+		client.get(url, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject response){
 				JSONArray imageJsonResults = null;
@@ -93,9 +101,32 @@ public class SearchActivity extends Activity {
 		
 	}
 	
-	 private void customLoadMoreDataFromApi(int offset) {
-		 Toast.makeText(this,"offset"+Integer.toString(offset),Toast.LENGTH_SHORT).show();
-		 searchWithOffset(offset); 
-	 }
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+	
+    public void onSettings(MenuItem mi) {
+    	Intent i = new Intent(this,SettingsActivity.class);
+    	i.putExtra(SETTINGS_KEY, setting);
+    	startActivityForResult(i, 41);
+     } 
+	
+	public void customLoadMoreDataFromApi(int offset) {
+		Toast.makeText(this,"offset"+Integer.toString(offset),Toast.LENGTH_SHORT).show();
+		searchWithOffset(offset); 
+	}
+	
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+     super.onActivityResult(requestCode, resultCode, data);
+
+      if (requestCode ==  41 && resultCode == RESULT_OK) {
+    	  setting = (Settings) data.getSerializableExtra(SETTINGS_KEY); 
+    	  Log.d("QUERY_RECEIVED", setting.getQueryString());
+      }
+    } 
 	
 }
