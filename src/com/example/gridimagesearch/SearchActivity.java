@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -16,23 +17,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.Toast;
+import android.widget.SearchView;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-public class SearchActivity extends Activity {
+public class SearchActivity extends Activity implements SearchView.OnQueryTextListener{
 	public static final String SETTINGS_KEY = "settings";
-	EditText etQuery;
 	GridView gvResults;
-	Button btnSearch;
 	String query;
 	ArrayList <ImageResult> imageResults = new ArrayList <ImageResult>();
 	ImageResultsArrayAdapter imageAdapter;
     Settings setting;
+    SearchView mSearchView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +39,8 @@ public class SearchActivity extends Activity {
 		imageAdapter = new ImageResultsArrayAdapter(this, imageResults);
 		setupViews();
 		setting = new Settings();
+		ActionBar actionBar = getActionBar();
+	    actionBar.setDisplayHomeAsUpEnabled(true);
 		gvResults.setAdapter(imageAdapter);
 		gvResults.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -65,24 +65,13 @@ public class SearchActivity extends Activity {
 	}
 	
 	public void setupViews(){
-		etQuery = (EditText)findViewById(R.id.etQuery);
 		gvResults = (GridView)findViewById(R.id.gvResults);
-		btnSearch = (Button)findViewById(R.id.btnSearch);
-	}
-	
-	public void onImageSearch(View v){
-		query = etQuery.getText().toString();
-		Toast.makeText(this,"query"+query,Toast.LENGTH_SHORT).show();
-		imageResults.clear();
-		imageAdapter.clear();
-		searchWithOffset(0);
 	}
 	
 	public void searchWithOffset(int offset){
 		AsyncHttpClient client = new AsyncHttpClient();
 		String url= "https://ajax.googleapis.com/ajax/services/search/images?" +
                 "start=" + Integer.toString(offset*8) + "&v=1.0&q=" + Uri.encode(query)+"&rsz=8"+setting.getQueryString().toString();
-        Toast.makeText(this, url, Toast.LENGTH_LONG).show();
   	    Log.d("QUERY_DONE",setting.getQueryString());
 
 		client.get(url, new JsonHttpResponseHandler(){
@@ -105,6 +94,9 @@ public class SearchActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) searchItem.getActionView();
+        setupSearchView(searchItem);
         return true;
     }
 	
@@ -115,7 +107,6 @@ public class SearchActivity extends Activity {
      } 
 	
 	public void customLoadMoreDataFromApi(int offset) {
-		Toast.makeText(this,"offset"+Integer.toString(offset),Toast.LENGTH_SHORT).show();
 		searchWithOffset(offset); 
 	}
 	
@@ -127,6 +118,41 @@ public class SearchActivity extends Activity {
     	  setting = (Settings) data.getSerializableExtra(SETTINGS_KEY); 
     	  Log.d("QUERY_RECEIVED", setting.getQueryString());
       }
-    } 
+    }
+    
+    private void setupSearchView(MenuItem searchItem) {
+    	if (isAlwaysExpanded()) {
+            mSearchView.setIconifiedByDefault(false);
+        } else {
+            searchItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM
+                    | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+        }
+    	
+    	 mSearchView.setOnQueryTextListener(this);
+    	
+    }
+
+	@Override
+	public boolean onQueryTextSubmit(String query) {
+		this.query = query;
+		imageResults.clear();
+		imageAdapter.clear();
+		searchWithOffset(0);
+		return true;
+	}
+
+	@Override
+	public boolean onQueryTextChange(String newText) {
+		// TODO Auto-generated method stub
+		return false;
+	} 
+	
+	public boolean onClose() {
+	      return false;
+	}
+	
+	protected boolean isAlwaysExpanded() {
+	      return false;
+	}
 	
 }

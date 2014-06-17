@@ -9,6 +9,7 @@
     <string name="title_settings_activity">Settings</string>
     <string name="site_filter">Filter by Site Name</string>
     <string name="save_settings">Save</string>
+    <string name="settings">Settings</string>
     
 
 </resources>
